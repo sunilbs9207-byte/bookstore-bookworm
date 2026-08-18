@@ -148,6 +148,64 @@ bookstore-bookworm/
 
 ---
 
+## 🗄️ Database Schema
+
+```
+┌─────────────┐       ┌─────────────┐       ┌─────────────┐
+│    users    │       │  categories │       │   brands    │
+│─────────────│       │─────────────│       │─────────────│
+│ id (PK)     │       │ id (PK)     │       │ id (PK)     │
+│ name        │       │ name        │       │ name        │
+│ email       │       └─────────────┘       └─────────────┘
+│ password_   │              │                     │
+│   hash      │              │                     │
+│ gift_points │       ┌──────▼─────────────────────▼──────┐
+│ created_at  │       │              books                 │
+└──────┬──────┘       │────────────────────────────────────│
+       │              │ id (PK)                            │
+       │              │ title, author, price               │
+       │              │ image_url, rating, stock           │
+       │              │ delivery_days                      │
+       │              │ category_id (FK) · brand_id (FK)   │
+       │              └───────────────┬────────────────────┘
+       │                              │
+       ├──────────────────────────────┤
+       │                              │
+┌──────▼──────┐              ┌────────▼────────┐
+│  addresses  │              │      cart       │
+│─────────────│              │─────────────────│
+│ id (PK)     │              │ id (PK)         │
+│ user_id(FK) │              │ user_id (FK)    │
+│ name, line1 │              │ book_id (FK)    │
+│ city, state │              │ quantity        │
+│ zip, country│              │ added_at        │
+│ is_default  │              └─────────────────┘
+└──────┬──────┘
+       │
+┌──────▼──────┐       ┌─────────────────────┐
+│   orders    │       │    order_items      │
+│─────────────│       │─────────────────────│
+│ id (PK)     │◄──────│ id (PK)             │
+│ user_id(FK) │       │ order_id (FK)       │
+│ address_id  │       │ book_id (FK)        │
+│ payment_    │       │ title, quantity     │
+│   method    │       │ price               │
+│ subtotal    │       └─────────────────────┘
+│ gift_disc.  │
+│ total       │
+│ status      │
+│ created_at  │
+└─────────────┘
+```
+
+**Key design decisions:**
+- `orders.id` is a `VARCHAR` string (`ORD-<timestamp>`), not a serial integer
+- `cart` has a `UNIQUE(user_id, book_id)` constraint — adding same book increments quantity
+- `gift_points`: 100 pts = $1 discount; new users start with 500 pts
+- Order cancellation restores book stock and is limited to a 48-hour window
+
+---
+
 ## 📖 API Reference
 
 See [`bookstore-backend/openapi.yaml`](bookstore-backend/openapi.yaml) for the full OpenAPI specification.
