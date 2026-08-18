@@ -1,0 +1,55 @@
+{
+  "name": "bookstore",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "eslint .",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@carbon/icons-react": "^11.86.0",
+    "@carbon/react": "^1.114.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-router-dom": "^7.18.2",
+    "sass": "^1.102.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.4",
+    "eslint": "^10.8.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.3",
+    "globals": "^17.7.0",
+    "vite": "^8.2.0"
+  },
+  "allowScripts": {
+    "@carbon/colors@11.56.0": true,
+    "@carbon/feature-flags@1.7.0": true,
+    "@carbon/grid@11.60.0": true,
+    "@carbon/icon-helpers@10.80.0": true,
+    "@carbon/icons-react@11.86.0": true,
+    "@carbon/layout@11.57.0": true,
+    "@carbon/motion@11.50.0": true,
+    "@carbon/react@1.114.0": true,
+    "@carbon/styles@1.113.0": true,
+    "@carbon/themes@11.79.0": true,
+    "@carbon/type@11.65.0": true,
+    "@carbon/utilities@0.24.0": true,
+    "@ibm/plex@6.4.1": true,
+    "@ibm/plex-mono@2.5.0": true,
+    "@ibm/plex-sans@1.1.0": true,
+    "@ibm/plex-sans-arabic@1.1.0": true,
+    "@ibm/plex-sans-devanagari@1.1.0": true,
+    "@ibm/plex-sans-hebrew@1.1.0": true,
+    "@ibm/plex-sans-thai@1.1.0": true,
+    "@ibm/plex-sans-thai-looped@1.1.0": true,
+    "@ibm/plex-serif@2.0.0": true,
+    "@parcel/watcher@2.6.0": true
+  }
+}

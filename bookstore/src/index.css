@@ -1,0 +1,13 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  background-color: #f4f4f4;
+}
+.page-content {
+  padding: 2rem;
+  min-height: 80vh;
+}

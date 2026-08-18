@@ -1,0 +1,504 @@
+openapi: 3.0.0
+info:
+  title: Bookstore API
+  version: 1.0.0
+  description: >
+    REST API for E-Bookstore Capstone Project.
+    Built with Node.js, Express and PostgreSQL.
+servers:
+  - url: http://localhost:5000/api
+    description: Local development server
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Book:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        author:
+          type: string
+        price:
+          type: number
+        category:
+          type: string
+        brand:
+          type: string
+        image_url:
+          type: string
+        delivery_days:
+          type: integer
+        rating:
+          type: number
+        stock:
+          type: integer
+        delivery_date:
+          type: string
+          format: date
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        gift_points:
+          type: integer
+    CartItem:
+      type: object
+      properties:
+        id:
+          type: integer
+        book_id:
+          type: integer
+        title:
+          type: string
+        author:
+          type: string
+        price:
+          type: number
+        quantity:
+          type: integer
+        subtotal:
+          type: number
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+        status:
+          type: string
+          enum: [Processing, Delivered, Cancelled]
+        subtotal:
+          type: number
+        gift_discount:
+          type: number
+        total:
+          type: number
+        payment_method:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+paths:
+  # ===== AUTH =====
+  /auth/register:
+    post:
+      tags: [Auth]
+      summary: Register new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, email, password]
+              properties:
+                name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  token:
+                    type: string
+        '400':
+          description: Email already registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /auth/login:
+    post:
+      tags: [Auth]
+      summary: Login user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+                  token:
+                    type: string
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /auth/profile:
+    get:
+      tags: [Auth]
+      summary: Get user profile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  # ===== BOOKS =====
+  /books:
+    get:
+      tags: [Books]
+      summary: Get all books
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: brand
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of books
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Book'
+  /books/{id}:
+    get:
+      tags: [Books]
+      summary: Get book by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Book details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '404':
+          description: Book not found
+    /books/{id}/related:
+    get:
+      tags: [Books]
+      summary: Get related books
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Related books
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Book'
+  /books/categories:
+    get:
+      tags: [Books]
+      summary: Get all categories
+      responses:
+        '200':
+          description: List of categories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+  /books/brands:
+    get:
+      tags: [Books]
+      summary: Get all brands
+      responses:
+        '200':
+          description: List of brands
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                    name:
+                      type: string
+  # ===== CART =====
+  /cart:
+    get:
+      tags: [Cart]
+      summary: Get user cart
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Cart items and total
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CartItem'
+                  total:
+                    type: string
+                  count:
+                    type: integer
+    post:
+      tags: [Cart]
+      summary: Add item to cart
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [bookId]
+              properties:
+                bookId:
+                  type: integer
+                quantity:
+                  type: integer
+                  default: 1
+      responses:
+        '201':
+          description: Item added to cart
+        '404':
+          description: Book not found
+        '400':
+          description: Insufficient stock
+    delete:
+      tags: [Cart]
+      summary: Clear entire cart
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Cart cleared
+  /cart/{id}:
+    put:
+      tags: [Cart]
+      summary: Update cart item quantity
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [quantity]
+              properties:
+                quantity:
+                  type: integer
+      responses:
+        '200':
+          description: Cart item updated
+        '404':
+          description: Cart item not found
+    delete:
+      tags: [Cart]
+      summary: Remove item from cart
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Item removed from cart
+        '404':
+          description: Cart item not found
+  # ===== ORDERS =====
+  /orders:
+    get:
+      tags: [Orders]
+      summary: Get all user orders
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+    post:
+      tags: [Orders]
+      summary: Place new order
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [addressId, paymentMethod, cartItems, subtotal, total]
+              properties:
+                addressId:
+                  type: integer
+                paymentMethod:
+                  type: string
+                  enum: [credit, paypal, cod]
+                cartItems:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      book_id:
+                        type: integer
+                      title:
+                        type: string
+                      quantity:
+                        type: integer
+                      price:
+                        type: number
+                subtotal:
+                  type: number
+                giftDiscount:
+                  type: number
+                total:
+                  type: number
+      responses:
+        '201':
+          description: Order placed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  order:
+                    $ref: '#/components/schemas/Order'
+  /orders/recommendations:
+    get:
+      tags: [Orders]
+      summary: Get book recommendations based on order history
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Recommended books
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Book'
+  /orders/{id}:
+    get:
+      tags: [Orders]
+      summary: Get order by ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Order details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+        '404':
+          description: Order not found
+  /orders/{id}/cancel:
+    put:
+      tags: [Orders]
+      summary: Cancel order within 48 hours
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Order cancelled successfully
+        '400':
+          description: Cannot cancel after 48 hours
+        '404':
+          description: Order not found
